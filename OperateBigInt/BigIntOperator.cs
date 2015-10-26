@@ -132,59 +132,6 @@ namespace BigIntOperator
 
         }
 
-        /** ! Be careful! This is not an invalid plus method, it may change the field value of left and right, just for a faster implementation
-         */
-        private static List<char> Plus(List<char> left, List<char> right)
-        {
-            List<char> buffer = left.Count > right.Count ? left : right;
-            List<char> smallNum = left.Count > right.Count ? right : left;
-            int carry = 0;
-            int i;
-            int temp;
-
-            for (i = 1; i <= buffer.Count; i++)
-            {
-                if (i > smallNum.Count)
-                {
-                    if (carry == 0)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        if ((temp = buffer.ElementAt(buffer.Count - i) - 48 + carry) < 10)
-                        {
-                            buffer[buffer.Count - i] = (char)('0' + temp);
-                            carry = 0;
-                        }
-                        else
-                        {
-                            buffer[buffer.Count - i] = (char)('0' + temp % 10);
-                            carry = 1;
-                        }
-                    }
-                }
-                else
-                {
-                    if ((temp = buffer[buffer.Count - i] + smallNum[smallNum.Count - i] - 96 + carry) < 10)
-                    {
-                        buffer[buffer.Count - i] = (char)('0' + temp);
-                        carry = 0;
-                    }
-                    else
-                    {
-                        buffer[buffer.Count - i] = (char)('0' + temp % 10);
-                        carry = 1;
-                    }
-                }
-            }
-            if (carry != 0)
-            {
-                buffer.Insert(0, '1');
-            }
-            return buffer;
-        }
-
         public static String Minus(String left, String right)
         {
             if (IsValidInput(left, right))
@@ -410,119 +357,172 @@ namespace BigIntOperator
 
         /**This is a valid minus method and will not change the field of left and right!
          */
-        public static char[] Multiply(char[] left, char[] right)
+//         public static char[] Multiply(char[] left, char[] right)
+//         {
+//             char[] largeNum = left.Length > right.Length ? left : right;
+//             char[] smallNum = left.Length > right.Length ? right : left;
+//             char[] result = new char[left.Length + right.Length];
+//             result[0] = '0';
+//             int largePoint = largeNum.Length;
+//             int i, j, k, l;
+//             int temp;
+//             int value;
+//             int carry = 0;
+// 
+//             largeNum.CopyTo(result, 1);
+//             for (i = largeNum.Length + 1; i < result.Length; i++)
+//             {
+//                 result[i] = '0';
+//             }
+//             value = smallNum[0];
+//             for (i = largePoint; i > 0; i--)
+//             {
+//                 if ((temp = (result[i] - '0') * (value - '0') + carry) >= 10)
+//                 {
+//                     result[i] = (char)('0' + temp % 10);
+//                     carry = temp / 10;
+//                 }
+//                 else
+//                 {
+//                     result[i] = (char)('0' + temp);
+//                     carry = 0;
+//                 }
+//             }
+//             result[0] = (char)(result[0] + carry);
+//             carry = 0;
+//             // add
+//             if (smallNum.Length > 1)
+//             {
+//                 largePoint++;
+//                 for (i = 1; i < smallNum.Length; i++)
+//                 {
+//                     k = largePoint;
+//                     for (j = largeNum.Length - 1; j >= 0; j--)
+//                     {
+// 
+//                         if ((temp = (smallNum[i] - '0') * (largeNum[j] - '0') + (result[k] - '0') + carry) >= 10)
+//                         {
+//                             result[k] = (char)('0' + temp % 10);
+//                             carry = temp / 10;
+//                             l = k;
+//                             while (carry > 0)
+//                             {
+//                                 l--;
+//                                 if ((temp = result[l] - '0' + carry) >= 10)
+//                                 {
+//                                     result[l] = (char)(temp % 10 + '0');
+//                                     carry = temp / 10;
+//                                 }
+//                                 else
+//                                 {
+//                                     result[l] = (char)(temp + '0');
+//                                     carry = 0;
+//                                 }
+//                             }
+//                         }
+//                         else
+//                         {
+//                             result[k] = (char)(temp + '0');
+//                             carry = 0;
+//                         }
+//                         k--;
+//                     }
+//                     largePoint++;
+//                 }
+//             }
+//             return result;
+//         }
+
+         public static char[] Multiply(char[] left, char[] right)
         {
             char[] largeNum = left.Length > right.Length ? left : right;
             char[] smallNum = left.Length > right.Length ? right : left;
-            char[] result = new char[left.Length + right.Length];
-            result[0] = '0';
-            int largePoint = largeNum.Length;
-            int i, j, k, l;
-            int temp;
-            int value;
-            int carry = 0;
-
-            largeNum.CopyTo(result, 1);
-            for (i = largeNum.Length + 1; i < result.Length; i++)
+            if (smallNum.Length > 5000)
             {
-                result[i] = '0';
-            }
-            value = smallNum[0];
-            for (i = largePoint; i > 0; i--)
-            {
-                if ((temp = (result[i] - '0') * (value - '0') + carry) >= 10)
+                // choose n
+                int n,i;
+                for (i = smallNum.Length / 2; i < smallNum.Length; i++)
                 {
-                    result[i] = (char)('0' + temp % 10);
-                    carry = temp / 10;
-                }
-                else
-                {
-                    result[i] = (char)('0' + temp);
-                    carry = 0;
-                }
-            }
-            result[0] = (char)(result[0] + carry);
-            carry = 0;
-            // add
-            if (smallNum.Length > 1)
-            {
-                largePoint++;
-                for (i = 1; i < smallNum.Length; i++)
-                {
-                    k = largePoint;
-                    for (j = largeNum.Length - 1; j >= 0; j--)
+                    if (smallNum[i] != '0')
                     {
-
-                        if ((temp = (smallNum[i] - '0') * (largeNum[j] - '0') + (result[k] - '0') + carry) >= 10)
-                        {
-                            result[k] = (char)('0' + temp % 10);
-                            carry = temp / 10;
-                            l = k;
-                            while (carry > 0)
-                            {
-                                l--;
-                                if ((temp = result[l] - '0' + carry) >= 10)
-                                {
-                                    result[l] = (char)(temp % 10 + '0');
-                                    carry = temp / 10;
-                                }
-                                else
-                                {
-                                    result[l] = (char)(temp + '0');
-                                    carry = 0;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            result[k] = (char)(temp + '0');
-                            carry = 0;
-                        }
-                        k--;
+                        break;
                     }
-                    largePoint++;
                 }
-            }
-            return result;
-        }
-
-        private static List<char> Multiply(List<char> left, List<char> right)
-        {
-            List<char> largeNum = left.Count > right.Count ? left : right;
-            List<char> smallNum = left.Count > right.Count ? right : left;
-            List<char> result = null;
-
-            for (int i = smallNum.Count - 1; i >= 0; i--)
-            {
-                if (result == null)
+                n = smallNum.Length - i - 1;
+                // largeNum = A*10^n+B
+                char[] A = new char[largeNum.Length - n];
+                Copy(A, largeNum, 0, 0);
+                char[] B = new char[n];
+                Copy(B, largeNum, 0, largeNum.Length - n);
+                // smallNum = C*10^n+D
+                char[] C = new char[smallNum.Length - n];
+                Copy(A, smallNum, 0, 0);
+                char[] D = new char[n];
+                Copy(B, smallNum, 0, smallNum.Length - n);
+                // get AC
+                char[] AC = Multiply(A, C);
+                // get BD
+                char[] BD = Multiply(B, D);
+                // get (A-B)(D-C)
+                bool positive = true;
+                char[] A_B = Minus(A, B);
+                char[] D_C = Minus(D, C);
+                if (A_B[0] == '-')
                 {
-                    result = Multiply(largeNum, smallNum[i], smallNum.Count - 1 - i);
+                    A_B = DeleteSign(A_B);
+                    if (D_C[0] == '-')
+                    {
+                        D_C = DeleteSign(D_C);
+                    }
+                    else
+                    {
+                        positive = false;
+                    }
+                }
+                else if (D_C[0] == '-')
+                {
+                    D_C = DeleteSign(D_C);
+                    positive = false;
+                }
+                char[] A_BD_C = Multiply(A_B, D_C);
+                // AC*10^2n+BD+((A-B)(D-C)+AC+BD)*10^n
+                char[] temp;
+                if (positive)
+                {
+                    temp = Plus(Plus(A_BD_C, AC), BD);
                 }
                 else
                 {
-                    result = Plus(result, Multiply(largeNum, smallNum[i], smallNum.Count - 1 - i));
+                    temp = Minus(Plus(AC, BD), A_BD_C);
                 }
+                char[] result = Plus(Plus(ShiftLeft(AC, 2 * n), ShiftLeft(temp, n)), BD);
+                return result;
             }
-            return result;
-        }
-        /**This is a valid Multiply method and will not change the field of left and right!
-        */
+            else
+            {
 
-        /**This is a valid Multiply method and will not change the field of left and right!
-         */
-        private static List<char> Multiply(List<char> left, char right, int offset)
-        {
-            List<char> leftCopy = new List<char>(left);
-            if (right != '1')      // else stay the same for the left
-            {
-                Multiply(leftCopy, right);
             }
-            for (int i = 0; i < offset; i++)
-            {
-                leftCopy.Add('0');
-            }
-            return leftCopy;
         }
+
+
+        private static char[] DeleteSign(char[] input)
+         {
+            if(input[0]=='-')
+            {
+                char[] array = new char[input.Length - 1];
+                Copy(array, input, 0, 1);
+                return array;
+            }
+            return input;
+         }
+
+         private static void Copy(char[] des, char[] source, int desBegin, int sourceBegin)
+         {
+            for (int i = sourceBegin, j=desBegin; i < source.Length && j<des.Length; i++,j++)
+            {
+                des[j] = source[i];
+            }
+         }
 
         private static char[] Multiply(char[] left, char right, int offset)
         {
@@ -570,160 +570,18 @@ namespace BigIntOperator
             return left;
         }
 
-        /** ! Be careful! This is not an invalid multiply method, it may change the field value of left and right, just for a faster implementation
-      */
-        private static void Multiply(List<char> left, char right)
+
+        private static char[] ShiftLeft(char[] bigInteger, int bitNums)
         {
-            int carray = 0;
-            int i;
-            int temp = 0;
-            int rightValue = right - 48;
-
-            for (i = left.Count - 1; i >= 0; i--)
+            char[] array = new char[bigInteger.Length + bitNums];
+            bigInteger.CopyTo(array, 0);
+            for(int i=bigInteger.Length;i<array.Length;i++)
             {
-                temp = (left[i] - '0') * rightValue + carray;
-                carray = temp / 10;
-                left[i] = (char)('0' + temp - carray * 10);
+                array[i] = '0';
             }
-            if (carray > 0)
-            {
-                left.Insert(0, (char)('0' + carray));
-            }
+            return array;
         }
-
-        public static Pair<String, String> Divide(String left, String right)
-        {
-            if (IsValidInput(left, right))
-            {
-                Pair<char[], char[]> temp = Divide(left.ToArray(), right.ToArray());
-                Pair<String, String> pair = new Pair<String, String>();
-                pair.first = new string(temp.first);
-                pair.second = new string(temp.second);
-                return pair;
-            }
-            else
-            {
-                throw new Exception("Invalid input!");
-            }
-        }
-
-        public static Pair<char[], char[]> Divide(char[] left, char[] right)
-        {
-            Pair<char[], char[]> pair = new Pair<char[], char[]>();
-            char[] zero = new char[1];
-            zero[0] = '0';
-            if (left.Length < right.Length)
-            {
-                pair.first = zero;
-                pair.second = left;
-                return pair;
-            }
-            char[] leftArray = left.ToArray();
-            char[] rightArray = right.ToArray();
-            int temp;
-            if ((temp = Compare(leftArray, rightArray)) == -1)
-            {
-                pair.first = zero;
-                pair.second = left;
-                return pair;
-            }
-            else if (temp == 0)
-            {
-                char[] one = new char[1];
-                one[0] = '1';
-                pair.first = one;
-                pair.second = zero;
-                return pair;
-            }
-            // left(32) > right(12)
-            if (leftArray.Length == rightArray.Length)
-            {
-                pair = DivideParallel(leftArray, rightArray);
-                return pair;
-            }
-            else      // left(324) > right(12)
-            {
-                Pair<char[], char[]> staticPair = new Pair<char[], char[]>();
-                staticPair.first = zero;
-                staticPair.second = zero;
-                Pair<char[], char[]> tempPair;
-
-                for (int i = left.Length - right.Length; i >= 0; i--)
-                {
-                    rightArray = Multiply(right, '1', i);
-                    tempPair = DivideParallel(leftArray, rightArray);
-                    staticPair.first = Plus(staticPair.first, Multiply(tempPair.first, '1', i));
-                    leftArray = tempPair.second;
-                }
-                staticPair.second = leftArray;
-                return staticPair;
-            }
-        }
-
-        protected static Pair<char[], char[]> DivideParallel(char[] left, char[] right)
-        {
-
-            Pair<char[], char[]> pair = new Pair<char[], char[]>();
-            char[] zero = new char[1];
-            zero[0] = '0';
-            char[] one = new char[1];
-            one[0] = '1';
-            char[] variable = new char[1];
-            variable[0] = '0';
-            int temp = 0;
-            if ((temp = Compare(left, right)) == -1)
-            {
-                pair.first = zero;
-                pair.second = left;
-                return pair;
-            }
-            else if (temp == 0)
-            {
-                pair.first = one;
-                pair.second = zero;
-                return pair;
-            }
-            int leftFirstBit, rightFirstBit;
-            if (left.Length == right.Length)        // left(32) > right(12)
-            {
-                leftFirstBit = left[0] - '0';
-                rightFirstBit = right[0] - '0';
-            }
-            else      // left(121) > right(32)
-            {
-                leftFirstBit = (left[0] - '0') * 10 + left[1] - '0';
-                rightFirstBit = right[0] - '0';
-            }
-            int factor = leftFirstBit / rightFirstBit;
-            int i;
-            char[] tempChar;
-
-            if (factor == 1)
-            {
-                pair.first = one;
-                pair.second = Minus(left, right);
-                return pair;
-            }
-            for (i = factor; i >= 1; i--)  // 二分查找也行  (condition: 32/19)
-            {
-                if ((temp = Compare(left, tempChar = Multiply(right, (char)(i + '0')))) > 0)    // TODO: optimize this part
-                {
-                    variable[0] = (char)('0' + i);
-                    pair.first = variable;
-                    pair.second = Minus(left, tempChar);
-                    return pair;
-                }
-                else if (temp == 0)
-                {
-                    variable[0] = (char)(i + '0');
-                    pair.first = variable;
-                    pair.second = zero;
-                    return pair;
-                }
-            }
-            return null;
-        }
-
+        
         /* if left>right, return 1 else if left<right return -1 else return 0
          */
         public static int Compare(char[] left, char[] right)
